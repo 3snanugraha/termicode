@@ -21,7 +21,7 @@ def print_banner():
     banner = f"""{Colors.BRIGHT_CYAN}
 ╔════════════════════════════════════════════════════════════╗
 ║                                                            ║
-║        {Colors.BOLD}Terminal Coding Assistant by Tris{Colors.RESET}{Colors.BRIGHT_CYAN}                   ║
+║        {Colors.BOLD}Terminal Coding Assistant{Colors.RESET}{Colors.BRIGHT_CYAN}                           ║
 ║                                                            ║
 ║  {Colors.BRIGHT_WHITE}AI-powered coding assistant for your terminal{Colors.BRIGHT_CYAN}             ║
 ║                                                            ║
