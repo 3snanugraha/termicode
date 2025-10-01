@@ -21,7 +21,7 @@ def print_banner():
     banner = f"""{Colors.BRIGHT_CYAN}
 ╔════════════════════════════════════════════════════════════╗
 ║                                                            ║
-║        {Colors.BOLD}Terminal Coding Assistant{Colors.RESET}{Colors.BRIGHT_CYAN}                       ║
+║        {Colors.BOLD}Terminal Coding Assistant by Tris{Colors.RESET}{Colors.BRIGHT_CYAN}                       ║
 ║                                                            ║
 ║  {Colors.BRIGHT_WHITE}AI-powered coding assistant for your terminal{Colors.BRIGHT_CYAN}           ║
 ║                                                            ║
@@ -127,6 +127,11 @@ def main():
         except KeyboardInterrupt:
             print(f"\n{Colors.YELLOW}⚠ Interrupted. Type 'exit' to quit.{Colors.RESET}\n")
             continue
+
+        except EOFError:
+            # Handle EOF (when stdin is closed or no interactive input)
+            print(f"\n{Colors.BRIGHT_CYAN}Goodbye! 👋{Colors.RESET}\n")
+            break
 
         except Exception as e:
             print_error(f"An error occurred: {e}")

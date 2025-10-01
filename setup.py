@@ -6,14 +6,15 @@ setup(
     version="1.0.0",
     description="AI-powered terminal coding assistant",
     author="Tris",
-    packages=find_packages(),
+    packages=find_packages(where='src'),
+    package_dir={'': 'src'},
     install_requires=[
         "openai>=1.0.0",
         "python-dotenv>=1.0.0",
     ],
     entry_points={
         'console_scripts': [
-            'termicode=main:main',
+            'termicode=termicode.cli:main',
         ],
     },
     python_requires='>=3.8',

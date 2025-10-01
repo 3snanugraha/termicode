@@ -1,5 +1,6 @@
 """Main assistant logic"""
 import os
+import re
 from typing import List, Dict, Any
 from src.ai_client import AIClient
 from src.utils.tool_executor import ToolExecutor
@@ -174,49 +175,19 @@ class CodingAssistant:
                 full_response.append(chunk)
                 yield chunk
         else:
-            # In SILENT mode, hide JSON blocks
-            in_json_block = False
-            buffer = []
-
+            # In SILENT mode, collect all response first then filter JSON blocks
             for chunk in self.ai_client.chat_stream(messages, temperature=0.7):
                 full_response.append(chunk)
 
-                # Skip chunks when inside JSON block
-                if in_json_block:
-                    buffer.append(chunk)
-                    buffer_text = "".join(buffer)
+            # Remove JSON blocks from response
+            response_text = "".join(full_response)
 
-                    # Check if exiting JSON block
-                    if "\n```" in buffer_text or "\r```" in buffer_text or buffer_text.strip().endswith("```"):
-                        # Find the closing ```
-                        parts = buffer_text.split("```", 1)
-                        if len(parts) > 1:
-                            # Keep text after closing ```
-                            buffer = [parts[1]]
-                            in_json_block = False
-                        else:
-                            buffer = []
-                            in_json_block = False
-                else:
-                    buffer.append(chunk)
-                    buffer_text = "".join(buffer)
+            # Remove all ```json ... ``` blocks
+            cleaned_text = re.sub(r'```json\s*\{[^`]*\}\s*```', '', response_text, flags=re.DOTALL)
 
-                    # Check if entering JSON block
-                    if "```json" in buffer_text:
-                        # Output everything before ```json
-                        pre_json = buffer_text.split("```json")[0]
-                        if pre_json:
-                            yield pre_json
-                        buffer = []
-                        in_json_block = True
-                    elif len(buffer_text) > 100:
-                        # Not in JSON block and buffer is getting large - flush it
-                        yield buffer_text
-                        buffer = []
-
-            # Flush remaining buffer if not in JSON block
-            if buffer and not in_json_block:
-                yield "".join(buffer)
+            # Yield the cleaned text
+            if cleaned_text.strip():
+                yield cleaned_text
 
         # Process complete response for tool calls
         assistant_message = "".join(full_response)
@@ -247,9 +218,22 @@ class CodingAssistant:
             messages = self._get_messages()
             follow_up_parts = []
 
-            for chunk in self.ai_client.chat_stream(messages, temperature=0.7):
-                follow_up_parts.append(chunk)
-                yield chunk
+            # Stream follow-up response (with SILENT mode filtering)
+            if self.mode == 'DEBUG':
+                for chunk in self.ai_client.chat_stream(messages, temperature=0.7):
+                    follow_up_parts.append(chunk)
+                    yield chunk
+            else:
+                # SILENT mode - collect and filter
+                for chunk in self.ai_client.chat_stream(messages, temperature=0.7):
+                    follow_up_parts.append(chunk)
+
+                # Remove JSON blocks
+                follow_up_text = "".join(follow_up_parts)
+                cleaned_follow_up = re.sub(r'```json\s*\{[^`]*\}\s*```', '', follow_up_text, flags=re.DOTALL)
+
+                if cleaned_follow_up.strip():
+                    yield cleaned_follow_up
 
             # Add to history
             self.conversation_history.append({

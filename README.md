@@ -12,73 +12,192 @@ A terminal-based AI coding assistant (HF Token) via HuggingFace.
 
 ## Installation
 
-> **Quick Start:** See [install/QUICKSTART.md](install/QUICKSTART.md) for a simple 4-step guide.
+### Prerequisites
 
-### Quick Setup (4 Steps)
+Before installing, make sure you have:
+- **Python 3.8 or higher** installed
+- **pip** package manager
+- **HuggingFace account** (free) - Sign up at https://huggingface.co/join
+- **Git** (optional, for cloning)
 
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Step-by-Step Installation Guide
 
-2. **Install package:**
-   ```bash
-   pip install -e .
-   ```
+#### Step 1: Get the Code
 
-3. **Add to PATH (Windows):**
-   ```bash
-   install\setup_path.bat
-   ```
-
-   For Linux/Mac, see [install/INSTALL.md](install/INSTALL.md)
-
-4. **Restart terminal and run:**
-   ```bash
-   termicode
-   ```
-
-### Manual Installation
-
-1. Clone the repository:
-   ```bash
-   git clone <repo-url>
-   cd termicode
-   ```
-
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Install as global command:
-   ```bash
-   pip install -e .
-   ```
-
-4. Add Python Scripts to PATH - see [install/INSTALL.md](install/INSTALL.md) for detailed instructions.
-
-5. Restart terminal and test:
-   ```bash
-   termicode
-   ```
-
-### Configuration
-
-Configure `.env` file:
+**Option A: Clone with Git (recommended)**
 ```bash
-# Required: HuggingFace API Token
-HF_TOKEN='your-huggingface-token'
-
-# Optional: AI Model (default: deepseek-ai/DeepSeek-V3.2-Exp)
-MODEL=deepseek-ai/DeepSeek-V3.2-Exp
-
-# Optional: Display Mode (default: SILENT)
-MODE=SILENT  # Hide JSON tool calls
-# MODE=DEBUG  # Show JSON tool calls for debugging
+git clone https://github.com/yourusername/termicode.git
+cd termicode
 ```
 
-Get your HuggingFace token from: https://huggingface.co/settings/tokens
+**Option B: Download ZIP**
+- Download and extract the ZIP file
+- Open terminal/command prompt in the extracted folder
+
+#### Step 2: Install Python Dependencies
+
+Install required packages:
+```bash
+pip install -r requirements.txt
+```
+
+This installs:
+- `openai>=1.0.0` - For API compatibility with HuggingFace
+- `python-dotenv>=1.0.0` - For environment variable management
+
+#### Step 3: Install Termicode as Global Command
+
+Install the package in editable mode:
+```bash
+pip install -e .
+```
+
+**What this does:**
+- Creates a global `termicode` command
+- Links to your local code (changes take effect immediately)
+- No need to reinstall after code updates
+
+#### Step 4: Configure Environment Variables
+
+Create a `.env` file in the project root (copy from `.env.example`):
+
+**Windows:**
+```bash
+copy .env.example .env
+```
+
+**Linux/Mac:**
+```bash
+cp .env.example .env
+```
+
+Edit the `.env` file and add your HuggingFace token:
+```bash
+# Required: HuggingFace API Token
+HF_TOKEN=hf_your_actual_token_here
+
+# Optional: AI Model (default shown below)
+MODEL=deepseek-ai/DeepSeek-V3.2-Exp
+
+# Optional: Display Mode (SILENT or DEBUG)
+MODE=SILENT
+```
+
+**How to get HuggingFace Token:**
+1. Go to https://huggingface.co/settings/tokens
+2. Click "New token"
+3. Give it a name (e.g., "termicode")
+4. Select "Read" permission (sufficient for API calls)
+5. Copy the token (starts with `hf_`)
+6. Paste it in your `.env` file
+
+#### Step 5: Verify Installation
+
+Test if termicode is working:
+```bash
+termicode
+```
+
+If successful, you should see:
+```
+✓ AI assistant ready!
+
+╔════════════════════════════════════════════════════════════╗
+║                                                            ║
+║        Terminal Coding Assistant                           ║
+║                                                            ║
+║  AI-powered coding assistant for your terminal             ║
+║                                                            ║
+╚════════════════════════════════════════════════════════════╝
+
+You ▶
+```
+
+Type `exit` to quit.
+
+### Troubleshooting Common Issues
+
+#### Issue 1: "ModuleNotFoundError: No module named 'main'"
+
+**Solution:** Reinstall the package correctly:
+```bash
+pip uninstall termicode
+pip install -e .
+```
+
+#### Issue 2: "termicode: command not found" (Windows)
+
+**Problem:** Python Scripts folder is not in PATH.
+
+**Solution:** Add Python Scripts to PATH automatically:
+```bash
+install\setup_path.bat
+```
+
+Then **restart your terminal** and try again.
+
+**Manual solution (if script doesn't work):**
+1. Find your Python installation path (usually `C:\Users\YourName\AppData\Local\Programs\Python\Python3XX\`)
+2. Add `Scripts` subfolder to PATH:
+   - Search "Environment Variables" in Windows
+   - Edit "Path" variable
+   - Add: `C:\Users\YourName\AppData\Local\Programs\Python\Python3XX\Scripts`
+3. Restart terminal
+
+#### Issue 3: "termicode: command not found" (Linux/Mac)
+
+**Solution:** Make sure pip installs to a directory in your PATH:
+```bash
+# Check where pip installs scripts
+python3 -m site --user-base
+
+# Add to PATH (add to ~/.bashrc or ~/.zshrc)
+export PATH="$HOME/.local/bin:$PATH"
+
+# Reload shell
+source ~/.bashrc  # or source ~/.zshrc
+```
+
+#### Issue 4: "HF_TOKEN environment variable is not set!"
+
+**Solution:** Make sure your `.env` file exists and contains your token:
+```bash
+# Check if .env exists
+ls -la .env  # Linux/Mac
+dir .env     # Windows
+
+# Verify .env content (should show HF_TOKEN=hf_...)
+cat .env  # Linux/Mac
+type .env # Windows
+```
+
+#### Issue 5: "EOF when reading a line" (infinite loop)
+
+**Solution:** This is fixed in the latest version. Make sure you have the updated `main.py` with EOFError handling.
+
+### Advanced Configuration
+
+#### Changing AI Model
+
+You can use any HuggingFace model that supports chat completion:
+```bash
+# In .env file
+MODEL=meta-llama/Llama-3.1-70B-Instruct
+# or
+MODEL=Qwen/Qwen2.5-72B-Instruct
+```
+
+#### Debug Mode
+
+To see JSON tool calls (useful for debugging):
+```bash
+# In .env file
+MODE=DEBUG
+```
+
+#### Custom System Prompt
+
+Edit `src/prompts.py` to customize the AI's behavior.
 
 ## Usage
 
@@ -200,52 +319,12 @@ termicode/
 3. **Tool Execution**: The assistant executes the necessary tools (read files, run commands, etc.)
 4. **Response**: You receive a comprehensive answer with the results
 
-## Configuration
-
-All configuration is done via the `.env` file:
-
-### AI Model
-
-Change the AI model by setting `MODEL` in `.env`:
-```bash
-MODEL=deepseek-ai/DeepSeek-V3.2-Exp
-# Or use other HuggingFace models like:
-# MODEL=meta-llama/Llama-3.1-70B-Instruct
-# MODEL=Qwen/Qwen2.5-72B-Instruct
-```
-
-### Display Mode
-
-Set `MODE` in `.env` file:
-- **SILENT** (default): Hides JSON tool calls for clean output
-- **DEBUG**: Shows JSON tool calls for debugging
-
-```bash
-MODE=SILENT  # Clean output
-MODE=DEBUG   # Show all tool calls
-```
-
-### Customize System Prompt
-
-Edit `src/prompts.py` to modify the `SYSTEM_PROMPT` variable.
-
 ## Requirements
 
 - Python 3.8+
 - HuggingFace account and API token
 - openai Python package (for API compatibility)
-
-## Troubleshooting
-
-**Error: HF_TOKEN not set**
-- Make sure you've exported your HuggingFace token: `export HF_TOKEN='your-token'`
-
-**Import errors**
-- Ensure you're running from the project root directory
-- Check that all dependencies are installed: `pip install -r requirements.txt`
-
-**Command not working**
-- The assistant uses shell commands, make sure the required tools are installed on your system
+- python-dotenv for environment variable management
 
 ## License
 
