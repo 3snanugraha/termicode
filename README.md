@@ -9,6 +9,8 @@ A terminal-based AI coding assistant (HF Token) via HuggingFace.
 - 🛠️ **Shell Integration**: Execute bash/shell commands (git, npm, pip, etc.)
 - 💬 **Interactive Chat**: Natural conversation with streaming responses
 - 🤖 **Tool Calling**: AI can autonomously use tools to complete tasks
+- 💾 **Session Management**: Save conversations, resume later, manage context limits
+- 🧠 **Smart Context**: Automatic token management prevents API overflow
 
 ## Installation
 
@@ -242,7 +244,10 @@ python demo_ui.py
 - Type your questions or requests naturally
 - `clear` - Clear conversation history
 - `pwd` - Show current working directory
+- `context` - Show context/token usage statistics
 - `exit` or `quit` - Exit the assistant
+
+> **💡 Tip:** Use `context` command to monitor token usage. When usage > 80%, consider using `clear` to avoid API limits.
 
 ### Features
 
@@ -318,6 +323,58 @@ termicode/
 2. **AI Processing**: DeepSeek-V3.2 analyzes your request and decides which tools to use
 3. **Tool Execution**: The assistant executes the necessary tools (read files, run commands, etc.)
 4. **Response**: You receive a comprehensive answer with the results
+
+## Session & Context Management
+
+Termicode intelligently manages conversation context to prevent token overflow and enable session persistence.
+
+### Context Management (Default)
+
+**Memory-Only Mode** - Context stored in RAM during session:
+- ✅ Fast and simple
+- ✅ Automatic token limit management
+- ❌ Lost when you exit
+
+**Monitor usage:**
+```bash
+You ▶ context
+
+Context Information:
+  Messages: 8 (4 user, 4 assistant)
+  Estimated tokens: 2450 / 8000
+  Usage: 30.6%
+```
+
+### Session Persistence (Optional)
+
+Save conversations to disk and resume later:
+
+```python
+# Enable in main.py
+assistant = CodingAssistant(
+    enable_session=True,
+    session_name="my_project"
+)
+```
+
+**Benefits:**
+- 💾 Conversations saved to `.termicode_sessions/`
+- 🔄 Resume work across multiple days
+- 📊 Track conversation history
+
+**📖 Full Guide:** See [docs/SESSION_MANAGEMENT.md](docs/SESSION_MANAGEMENT.md) for complete documentation.
+
+### Token Limits
+
+Termicode automatically manages token limits to prevent API failures:
+
+| Strategy | Description |
+|----------|-------------|
+| **Truncation** | Remove old messages when limit reached |
+| **Sliding Window** | Keep only recent N message pairs |
+| **Compression** | Summarize middle messages, keep first & last |
+
+**Default limit:** 8,000 tokens (~6,000 words)
 
 ## Requirements
 

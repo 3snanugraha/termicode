@@ -21,9 +21,9 @@ def print_banner():
     banner = f"""{Colors.BRIGHT_CYAN}
 ╔════════════════════════════════════════════════════════════╗
 ║                                                            ║
-║        {Colors.BOLD}Terminal Coding Assistant by Tris{Colors.RESET}{Colors.BRIGHT_CYAN}                       ║
+║        {Colors.BOLD}Terminal Coding Assistant by Tris{Colors.RESET}{Colors.BRIGHT_CYAN}                   ║
 ║                                                            ║
-║  {Colors.BRIGHT_WHITE}AI-powered coding assistant for your terminal{Colors.BRIGHT_CYAN}           ║
+║  {Colors.BRIGHT_WHITE}AI-powered coding assistant for your terminal{Colors.BRIGHT_CYAN}             ║
 ║                                                            ║
 ╚════════════════════════════════════════════════════════════╝
 {Colors.RESET}"""
@@ -36,7 +36,7 @@ def print_banner():
     print(f"  {Colors.BRIGHT_GREEN}•{Colors.RESET} Run shell commands")
     print(f"  {Colors.BRIGHT_GREEN}•{Colors.RESET} Interactive diff viewer")
     print()
-    print(f"{Colors.DIM}Commands: {Colors.BRIGHT_WHITE}clear{Colors.DIM}, {Colors.BRIGHT_WHITE}pwd{Colors.DIM}, {Colors.BRIGHT_WHITE}exit{Colors.RESET}")
+    print(f"{Colors.DIM}Commands: {Colors.BRIGHT_WHITE}clear{Colors.DIM}, {Colors.BRIGHT_WHITE}pwd{Colors.DIM}, {Colors.BRIGHT_WHITE}context{Colors.DIM}, {Colors.BRIGHT_WHITE}exit{Colors.RESET}")
     print(f"{Colors.DIM}{'─' * 60}{Colors.RESET}\n")
 
 
@@ -64,7 +64,7 @@ def main():
     # Print banner
     print()
     print_banner()
-    print_info(f"Working Directory: {Colors.BOLD}{os.getcwd()}{Colors.RESET}")
+    print_info(f" Working Directory: {Colors.BOLD}{os.getcwd()}{Colors.RESET}")
     print()
 
     # Main conversation loop
@@ -89,6 +89,18 @@ def main():
 
             if user_input.lower() == 'pwd':
                 print_info(f"Current directory: {Colors.BOLD}{os.getcwd()}{Colors.RESET}")
+                continue
+
+            if user_input.lower() == 'context':
+                context_info = assistant.get_context_info()
+                print()
+                print(f"{Colors.BRIGHT_CYAN}Context Information:{Colors.RESET}")
+                print(f"  Messages: {Colors.BOLD}{context_info['total_messages']}{Colors.RESET} ({context_info['user_messages']} user, {context_info['assistant_messages']} assistant)")
+                print(f"  Estimated tokens: {Colors.BOLD}{context_info['estimated_tokens']}{Colors.RESET} / {assistant.context_manager.max_tokens_estimate}")
+                print(f"  Usage: {Colors.BOLD}{context_info['usage_percentage']:.1f}%{Colors.RESET}")
+                if context_info['usage_percentage'] > 80:
+                    print(f"  {Colors.YELLOW}⚠ Warning: Context is getting full. Consider using 'clear' command.{Colors.RESET}")
+                print()
                 continue
 
             # Show thinking spinner

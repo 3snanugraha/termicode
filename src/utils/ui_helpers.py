@@ -153,22 +153,22 @@ def print_section(title: str, color: str = Colors.BRIGHT_BLUE):
 
 def print_success(message: str):
     """Print success message"""
-    print(f"{Colors.BRIGHT_GREEN}✓{Colors.RESET} {message}")
+    print(f"{Colors.BRIGHT_GREEN}✓ {Colors.RESET} {message}")
 
 
 def print_error(message: str):
     """Print error message"""
-    print(f"{Colors.BRIGHT_RED}✗{Colors.RESET} {message}")
+    print(f"{Colors.BRIGHT_RED}✗ {Colors.RESET} {message}")
 
 
 def print_info(message: str):
     """Print info message"""
-    print(f"{Colors.BRIGHT_BLUE}ℹ{Colors.RESET} {message}")
+    print(f"{Colors.BRIGHT_BLUE}ℹ {Colors.RESET} {message}")
 
 
 def print_warning(message: str):
     """Print warning message"""
-    print(f"{Colors.BRIGHT_YELLOW}⚠{Colors.RESET} {message}")
+    print(f"{Colors.BRIGHT_YELLOW}⚠ {Colors.RESET} {message}")
 
 
 def clear_line():

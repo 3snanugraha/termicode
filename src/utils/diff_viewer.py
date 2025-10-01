@@ -126,7 +126,7 @@ class FileSummary:
     @staticmethod
     def print_file_read(filename: str, lines: int = 0):
         """Print file read message"""
-        print(f"{Colors.BRIGHT_BLUE}ℹ{Colors.RESET} Reading: {Colors.BOLD}{filename}{Colors.RESET}", end='')
+        print(f"{Colors.BRIGHT_BLUE}ℹ {Colors.RESET} Reading: {Colors.BOLD}{filename}{Colors.RESET}", end='')
         if lines > 0:
             print(f" {Colors.DIM}({lines} lines){Colors.RESET}")
         else:

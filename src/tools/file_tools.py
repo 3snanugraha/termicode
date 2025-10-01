@@ -41,6 +41,10 @@ class ReadTool(Tool):
 
     def execute(self, file_path: str, start_line: int = None, end_line: int = None) -> ToolResult:
         try:
+            # Convert to absolute path if relative
+            if not os.path.isabs(file_path):
+                file_path = os.path.abspath(file_path)
+
             if not os.path.exists(file_path):
                 return ToolResult(success=False, output="", error=f"File not found: {file_path}")
 
@@ -95,15 +99,26 @@ class WriteTool(Tool):
 
     def execute(self, file_path: str, content: str) -> ToolResult:
         try:
-            # Create directory if it doesn't exist
-            os.makedirs(os.path.dirname(file_path) or '.', exist_ok=True)
+            # Convert to absolute path if relative
+            if not os.path.isabs(file_path):
+                file_path = os.path.abspath(file_path)
 
+            # Create directory if it doesn't exist
+            dir_path = os.path.dirname(file_path)
+            if dir_path:
+                os.makedirs(dir_path, exist_ok=True)
+
+            # Write file
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
 
+            # Verify file was created
+            if not os.path.exists(file_path):
+                return ToolResult(success=False, output="", error=f"File was not created: {file_path}")
+
             return ToolResult(success=True, output=f"File written successfully: {file_path}")
         except Exception as e:
-            return ToolResult(success=False, output="", error=str(e))
+            return ToolResult(success=False, output="", error=f"{str(e)} (attempted path: {file_path})")
 
 
 class EditTool(Tool):
@@ -145,6 +160,10 @@ class EditTool(Tool):
 
     def execute(self, file_path: str, old_text: str, new_text: str, replace_all: bool = False) -> ToolResult:
         try:
+            # Convert to absolute path if relative
+            if not os.path.isabs(file_path):
+                file_path = os.path.abspath(file_path)
+
             if not os.path.exists(file_path):
                 return ToolResult(success=False, output="", error=f"File not found: {file_path}")
 

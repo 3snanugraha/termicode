@@ -1,18 +1,26 @@
 """Main assistant logic"""
 import os
 import re
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from src.ai_client import AIClient
 from src.utils.tool_executor import ToolExecutor
 from src.utils.interactive_executor import InteractiveToolExecutor
 from src.utils.response_parser import ResponseParser
+from src.utils.session_manager import SessionManager
+from src.utils.context_manager import ContextManager
 from src.prompts import get_system_prompt
 
 
 class CodingAssistant:
     """Terminal-based coding assistant"""
 
-    def __init__(self, model: str = None, interactive: bool = True):
+    def __init__(
+        self,
+        model: str = None,
+        interactive: bool = True,
+        enable_session: bool = False,
+        session_name: Optional[str] = None
+    ):
         # Read model from environment if not provided
         if model is None:
             model = os.getenv('MODEL', 'deepseek-ai/DeepSeek-V3.2-Exp')
@@ -29,12 +37,42 @@ class CodingAssistant:
         # Initialize with system prompt
         self.system_prompt = get_system_prompt()
 
+        # Session management
+        self.enable_session = enable_session
+        self.session_manager = SessionManager() if enable_session else None
+
+        # Context management (prevent token overflow)
+        self.context_manager = ContextManager(max_messages=20, max_tokens_estimate=8000)
+
+        # Load session if specified
+        if enable_session and session_name:
+            try:
+                self.conversation_history = self.session_manager.load_session(session_name)
+            except FileNotFoundError:
+                # Create new session if not found
+                self.session_manager.create_session(session_name)
+
     def _get_messages(self) -> List[Dict[str, str]]:
-        """Get messages for API call including system prompt"""
+        """Get messages for API call including system prompt with context management"""
+        # Truncate history if it exceeds limits
+        truncated_history = self.context_manager.truncate_history(
+            self.conversation_history,
+            self.system_prompt
+        )
+
         return [
             {"role": "system", "content": self.system_prompt},
-            *self.conversation_history
+            *truncated_history
         ]
+
+    def _save_to_session(self):
+        """Save current conversation to session file (if enabled)"""
+        if self.enable_session and self.session_manager:
+            self.session_manager.save_message(self.conversation_history)
+
+    def get_context_info(self) -> Dict[str, Any]:
+        """Get information about current context usage"""
+        return self.context_manager.get_context_stats(self.conversation_history)
 
     def process_message(self, user_message: str) -> str:
         """Process user message and return response"""
@@ -182,8 +220,8 @@ class CodingAssistant:
             # Remove JSON blocks from response
             response_text = "".join(full_response)
 
-            # Remove all ```json ... ``` blocks
-            cleaned_text = re.sub(r'```json\s*\{[^`]*\}\s*```', '', response_text, flags=re.DOTALL)
+            # Remove all ```json ... ``` blocks (non-greedy match)
+            cleaned_text = re.sub(r'```json.*?```', '', response_text, flags=re.DOTALL)
 
             # Yield the cleaned text
             if cleaned_text.strip():
@@ -228,9 +266,9 @@ class CodingAssistant:
                 for chunk in self.ai_client.chat_stream(messages, temperature=0.7):
                     follow_up_parts.append(chunk)
 
-                # Remove JSON blocks
+                # Remove JSON blocks (non-greedy match)
                 follow_up_text = "".join(follow_up_parts)
-                cleaned_follow_up = re.sub(r'```json\s*\{[^`]*\}\s*```', '', follow_up_text, flags=re.DOTALL)
+                cleaned_follow_up = re.sub(r'```json.*?```', '', follow_up_text, flags=re.DOTALL)
 
                 if cleaned_follow_up.strip():
                     yield cleaned_follow_up
@@ -247,6 +285,11 @@ class CodingAssistant:
                 "content": assistant_message
             })
 
+        # Save to session if enabled
+        self._save_to_session()
+
     def reset_conversation(self):
         """Clear conversation history"""
         self.conversation_history = []
+        # Save empty history to session
+        self._save_to_session()

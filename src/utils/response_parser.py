@@ -13,8 +13,8 @@ class ResponseParser:
         Extract tool calls from AI response.
         Returns: (text_content, tool_calls)
         """
-        # Try to find JSON with tool_calls (match multi-line JSON properly)
-        json_pattern = r'```json\s*(\{[^`]+\})\s*```'
+        # Try to find JSON with tool_calls (match multi-line JSON properly with non-greedy)
+        json_pattern = r'```json\s*(\{.*?\})\s*```'
         json_match = re.search(json_pattern, response, re.DOTALL)
 
         if json_match:

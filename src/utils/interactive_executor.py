@@ -93,8 +93,16 @@ class InteractiveToolExecutor(ToolExecutor):
             # Always show error details
             print(f"{Colors.DIM}{result}{Colors.RESET}")
         else:
+            # Show success message
             lines = content.count('\n') + 1
             FileSummary.print_file_created(file_path, lines)
+
+            # Verify file was actually created
+            import os
+            if not os.path.exists(file_path):
+                print_error(f"Warning: File was reported as created but does not exist at {file_path}")
+                if self.verbose:
+                    print(f"{Colors.DIM}Result: {result}{Colors.RESET}")
 
     def _display_edit_result(self, file_path: str, arguments: Dict[str, Any], result: str):
         """Display file edit result with diff"""
